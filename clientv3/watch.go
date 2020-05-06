@@ -511,6 +511,18 @@ func (w *watchGrpcStream) run() {
 		case <-w.ctx.Done():
 			return
 		case ws := <-w.closingc:
+			if ws.id != -1 {
+				// client is closing an established watch; close it on the server proactively instead of waiting
+				// to close when the next message arrives
+				cancelSet[ws.id] = struct{}{}
+				cr := &pb.WatchRequest_CancelRequest{
+					CancelRequest: &pb.WatchCancelRequest{
+						WatchId: ws.id,
+					},
+				}
+				req := &pb.WatchRequest{RequestUnion: cr}
+				wc.Send(req)
+			}
 			w.closeSubstream(ws)
 			delete(closing, ws)
 			if len(w.substreams)+len(w.resuming) == 0 {
