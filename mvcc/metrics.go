@@ -131,6 +131,14 @@ var (
 			Buckets: prometheus.ExponentialBuckets(100, 2, 14),
 		})
 
+	dbCompactionLast = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "etcd_debugging",
+			Subsystem: "mvcc",
+			Name:      "db_compaction_last",
+			Help:      "The unix time of the last db compaction. Resets to 0 on start.",
+		})
+
 	dbCompactionKeysCounter = prometheus.NewCounter(
 		prometheus.CounterOpts{
 			Namespace: "etcd_debugging",
@@ -222,6 +230,7 @@ func init() {
 	prometheus.MustRegister(indexCompactionPauseDurations)
 	prometheus.MustRegister(dbCompactionPauseDurations)
 	prometheus.MustRegister(dbCompactionTotalDurations)
+	prometheus.MustRegister(dbCompactionLast)
 	prometheus.MustRegister(dbCompactionKeysCounter)
 	prometheus.MustRegister(dbTotalSizeDebugging)
 	prometheus.MustRegister(dbTotalSize)
